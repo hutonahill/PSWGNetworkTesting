@@ -45,6 +45,8 @@ public abstract class NetworkNode {
         if(ParentNode != null) {
             throw new InvalidOperationException("You may not set a parent if it alread exits");
         }
+        
+        ParentNode = parent;
     }
     
     private void ClearParent() {
@@ -113,6 +115,59 @@ public abstract class NetworkNode {
         
         return output;
     }
-
-
+    
+    /// <summary>
+    /// Maximum number of jumps to get to a DataCache node.
+    /// <br/> if null node does not care.
+    /// </summary>
+    public abstract uint? MaximumJumpsToDataCache { get; protected init; }
+    
+    private uint _stepsToDataCache = uint.MaxValue;
+    
+    private void ClearDataCacheSteps() {
+        
+        _stepsToDataCache = uint.MaxValue;
+        
+        foreach (NetworkNode child in _childNodes) {
+            child.ClearDataCacheSteps();
+        }
+        
+    }
+    
+    public void FindDataCaches() {
+        if (ParentNode == null) {
+            ClearDataCacheSteps();
+        }
+        
+        foreach (NetworkNode child in _childNodes) {
+            child.FindDataCaches();
+        }
+        
+        if (GetType().IsAssignableTo(typeof(DataCache))) {
+            SetDataCacheDistance(0);
+        }
+    }
+    
+    private void SetDataCacheDistance(uint value) {
+        if (value == uint.MaxValue) {
+            throw new InvalidOperationException("May not exceed uint maximum value.");
+        }
+        
+        // only accept an update if the value is closer.
+        if (_stepsToDataCache <= value) {
+            return;
+        }
+        
+        _stepsToDataCache = value;
+        
+        uint newValue = value + 1;
+        
+        if (ParentNode != null) {
+            ParentNode.SetDataCacheDistance(newValue);
+        }
+        
+        foreach (NetworkNode child in _childNodes) {
+            child.SetDataCacheDistance(newValue);
+        }
+    }
 }

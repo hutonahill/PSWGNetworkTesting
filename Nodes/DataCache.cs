@@ -22,6 +22,6 @@
 
 namespace PSWGNetworkTesting.Nodes;
 
-public sealed class PowerNode {
+public sealed class DataCache {
     
 }

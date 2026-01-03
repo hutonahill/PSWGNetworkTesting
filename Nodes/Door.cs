@@ -22,7 +22,7 @@
 
 namespace PSWGNetworkTesting.Nodes;
 
-public class Door : NetworkNode {
+public sealed class Door : NetworkNode {
     public override uint PowerCost { get; protected init; } = 1;
 }
 
