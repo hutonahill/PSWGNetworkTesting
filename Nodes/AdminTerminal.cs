@@ -22,6 +22,23 @@
 
 namespace PSWGNetworkTesting.Nodes;
 
-public class AdminTerminal {
+public class AdminTerminal : NetworkNode {
+    public override uint PowerCost { get; protected init; }
+    public override uint? MaximumJumpsToDataCache { get; protected init; }
     
+    private List<PowerNode> _powerNodes = new ();
+    
+    private List<DataCache> _dataNodes = new ();
+    
+    public override void AddChild(NetworkNode node) {
+        if (node is PowerNode powerNode) {
+            _powerNodes.Add(powerNode);
+            // TODO: recalculate power.
+        }
+        else if (node is DataCache dataNode) {
+            _dataNodes.Add(dataNode);
+        }
+        
+        base.AddChild(node);
+    }
 }

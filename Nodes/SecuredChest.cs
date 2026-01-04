@@ -25,4 +25,17 @@ namespace PSWGNetworkTesting.Nodes;
 public sealed class SecuredChest : NetworkNode {
     public override uint PowerCost { get; protected init; } = 1;
     
+    public override uint? MaximumJumpsToDataCache { get; protected init; }
+    
+    public required object Contents { get; init; }
+    
+    public readonly int Pin = 1234;
+    
+    public object? Open(int pin) {
+        if (Powered && pin == Pin) {
+            return Contents;
+        }
+        
+        return null;
+    }
 }

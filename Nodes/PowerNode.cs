@@ -22,6 +22,32 @@
 
 namespace PSWGNetworkTesting.Nodes;
 
-public sealed class PowerNode {
+public sealed class PowerNode : NetworkNode {
+    public override uint PowerCost { get; protected init; } = 0;
     
+    public override uint? MaximumJumpsToDataCache { get; protected init; } = 2;
+    
+    public uint Producing { get; init; }
+    
+    public uint Available { get; private set; }
+    
+    public bool On { get; private set; }
+    
+    public void TurnPowerOn() {
+        if (!On) {
+            On = true;
+            Available = Producing;
+            
+            // TODO: Prompt the top node to re-allocate power.
+        }
+    }
+    
+    public void TurnPowerOff() {
+        if (On) {
+            On = false;
+            Available = 0;
+            
+            // TODO: Prompt the top node to re-allocate power.
+        }
+    }
 }

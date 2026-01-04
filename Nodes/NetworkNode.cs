@@ -60,7 +60,9 @@ public abstract class NetworkNode {
 
     public IReadOnlyList<NetworkNode> ChildNodes => _childNodes;
     
-    public void AddChild(NetworkNode node) {
+    // TODO: add RemoveChild method. needs to be virtual and AdminTerminal needs an override.
+    
+    public virtual void AddChild(NetworkNode node) {
         if (node == this) {
             throw new ArgumentException("You may not be a child of yourself.");
         }
@@ -76,10 +78,11 @@ public abstract class NetworkNode {
         node.SetParent(this);
         
         _childNodes.Add(node);
+        // TODO: need to recalculate closest DataNode.
     }
     
     /// <summary>
-    /// Gets wether a node is a child of this node.
+    /// Gets weather a node is a child of this node.
     /// <br/> recursively checks child nodes.
     /// </summary>
     /// <param name="node">Node to look for.</param>
@@ -102,6 +105,17 @@ public abstract class NetworkNode {
     /// How much power this node costs to run.
     /// </summary>
     public abstract uint PowerCost { get; protected init; }
+    
+    public bool Powered { get; private set; } = false;
+    
+    // These are seprate methods so we can attach things to them later if we need to.
+    public void Power() {
+        Powered = true;
+    }
+    
+    public void CutPower() {
+        Powered = false;
+    }
     
     /// <summary>
     /// Calculates how much power this node and its children cost.

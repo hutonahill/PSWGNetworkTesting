@@ -24,5 +24,18 @@ namespace PSWGNetworkTesting.Nodes;
 
 public sealed class Door : NetworkNode {
     public override uint PowerCost { get; protected init; } = 1;
+    
+    public override uint? MaximumJumpsToDataCache { get; protected init; } = 3;
+    
+    public bool Open { get; private set; }
+    
+    public bool ToggleDoor() {
+        if (Powered) {
+            Open = !Open;
+            return true;
+        }
+        
+        return false;
+    }
 }
 

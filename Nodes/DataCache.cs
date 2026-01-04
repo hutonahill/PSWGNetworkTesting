@@ -22,6 +22,9 @@
 
 namespace PSWGNetworkTesting.Nodes;
 
-public sealed class DataCache {
+public sealed class DataCache : NetworkNode {
+    public override uint PowerCost { get; protected init; } = 5;
+    public override uint? MaximumJumpsToDataCache { get; protected init; } = null;
     
+    // I don't think I this is done? I think I moved the functionality to NetworkNode.
 }
