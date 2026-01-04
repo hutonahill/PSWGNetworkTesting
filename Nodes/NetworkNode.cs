@@ -43,7 +43,7 @@ public abstract class NetworkNode {
     
     private void SetParent(NetworkNode parent){
         if(ParentNode != null) {
-            throw new InvalidOperationException("You may not set a parent if it alread exits");
+            throw new InvalidOperationException("You may not set a parent if it already exits");
         }
         
         ParentNode = parent;
@@ -108,7 +108,7 @@ public abstract class NetworkNode {
     
     public bool Powered { get; private set; } = false;
     
-    // These are seprate methods so we can attach things to them later if we need to.
+    // These are separate methods so we can attach things to them later if we need to.
     public void Power() {
         Powered = true;
     }
@@ -138,6 +138,9 @@ public abstract class NetworkNode {
     
     private uint _stepsToDataCache = uint.MaxValue;
     
+    /// <summary>
+    /// Sets the _stepsToDataCache values for all child nodes to maximum value.
+    /// </summary>
     private void ClearDataCacheSteps() {
         
         _stepsToDataCache = uint.MaxValue;
@@ -153,6 +156,7 @@ public abstract class NetworkNode {
             ClearDataCacheSteps();
         }
         
+        // point of the next two blocks is to only call SetDataCacheDistance on DataCaches.
         foreach (NetworkNode child in _childNodes) {
             child.FindDataCaches();
         }
