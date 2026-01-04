@@ -201,6 +201,6 @@ public abstract class NetworkNode {
     }
     
     public override string ToString() {
-        return $"{GetType().Name}{{ DataCache Distance: {_stepsToDataCache}, Powered: {Powered}}}";
+        return $"{GetType().Name} {{ DataCache Distance: {_stepsToDataCache}, Powered: {Powered}}}";
     }
 }
