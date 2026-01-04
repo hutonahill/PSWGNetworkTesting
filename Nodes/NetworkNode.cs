@@ -78,7 +78,8 @@ public abstract class NetworkNode {
         node.SetParent(this);
         
         _childNodes.Add(node);
-        // TODO: need to recalculate closest DataNode.
+        
+        FindRoot().FindDataCaches();
     }
     
     /// <summary>
@@ -187,5 +188,19 @@ public abstract class NetworkNode {
         foreach (NetworkNode child in _childNodes) {
             child.SetDataCacheDistance(newValue);
         }
+    }
+    
+    private NetworkNode FindRoot() {
+        NetworkNode current = this;
+        
+        while (current.ParentNode != null) {
+            current = current.ParentNode;
+        }
+        
+        return current;
+    }
+    
+    public override string ToString() {
+        return $"{GetType().Name}{{ DataCache Distance: {_stepsToDataCache}, Powered: {Powered}}}";
     }
 }
