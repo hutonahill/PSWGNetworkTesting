@@ -205,7 +205,7 @@ public class Commands
                         {
                             Console.WriteLine("Block has been broken!");
                         }
-                        if (value == "SIM_DATA_TERMINAL_BREACH")
+                        if (value == "SIM_DATA_TERMINAL_BREACH" && optionalArg1 == "hack")
                         {
                             Console.WriteLine("Data Terminal has been breached!");
                         }
