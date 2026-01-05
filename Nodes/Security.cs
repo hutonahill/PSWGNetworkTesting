@@ -22,12 +22,15 @@
 
 namespace PSWGNetworkTesting.Nodes;
 
-public sealed class DataCache : NetworkNode {
-    public override bool IsKeyNode { get; } = true;
-    
+// in final project we need a NetworkSecurity node and a PhysicalSecurityNode.
+public class Security : NetworkNode {
     public override uint PowerCost { get; protected init; } = 5;
     
-    public override uint? MaximumJumpsToDataCache { get; protected init; } = null;
+    public override uint? MaximumJumpsToDataCache { get; protected init; } = 3;
     
-    // I don't think I this is done? I think I moved the functionality to NetworkNode.
+    public bool Available { get; set; } = true;
+    
+    public void Invoke() {
+        // TODO: need to figure out what happens on an invoke.
+    }
 }

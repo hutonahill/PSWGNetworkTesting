@@ -23,6 +23,22 @@
 namespace PSWGNetworkTesting.Nodes;
 
 public abstract class NetworkNode {
+    public NetworkNode() {
+        if (lastId == uint.MaxValue){
+            throw new InvalidOperationException(
+                "NetworkNode ID limit exceeded (How?! this is a test bench!). " +
+                "A refactor to use ulong is required."
+            );
+        }
+        ID = Interlocked.Increment(ref lastId);
+    }
+    
+    private static uint lastId = 0;
+    
+    public uint ID { get; private set; }
+    
+    public virtual bool IsKeyNode { get; } = false;
+    
     /// <summary>
     /// How hard it is to get into the network at this node.
     /// </summary>
@@ -47,6 +63,9 @@ public abstract class NetworkNode {
         }
         
         ParentNode = parent;
+        if(AddedParent != null) {
+            AddedParent(parent);
+        }
     }
     
     private void ClearParent() {
@@ -61,6 +80,13 @@ public abstract class NetworkNode {
     public IReadOnlyList<NetworkNode> ChildNodes => _childNodes;
     
     // TODO: add RemoveChild method. needs to be virtual and AdminTerminal needs an override.
+    
+    /// <summary>
+    /// Invoked when a node is added as a child of another node.
+    /// </summary>
+    protected event Action<NetworkNode>? AddedParent;
+    
+    protected event Action<NetworkNode>? AddedChild;
     
     public virtual void AddChild(NetworkNode node) {
         if (node == this) {
@@ -79,7 +105,17 @@ public abstract class NetworkNode {
         
         _childNodes.Add(node);
         
-        FindRoot().FindDataCaches();
+        AdminTerminal root = FindRoot();
+        
+        root.FindDataCaches();
+        
+        if (node is PowerNode powerNode) {
+            powerNode.TurnPowerOn();
+        }
+        
+        if (AddedChild != null) {
+            AddedChild(node);
+        }
     }
     
     /// <summary>
@@ -190,14 +226,18 @@ public abstract class NetworkNode {
         }
     }
     
-    private NetworkNode FindRoot() {
+    protected AdminTerminal FindRoot() {
         NetworkNode current = this;
         
         while (current.ParentNode != null) {
             current = current.ParentNode;
         }
         
-        return current;
+        if (current is not AdminTerminal adminTerminal) {
+            throw new InvalidOperationException("Network must have an AdminTerminal as root.");
+        }
+        
+        return adminTerminal;
     }
     
     public override string ToString() {
