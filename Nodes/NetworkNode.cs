@@ -249,7 +249,7 @@ public abstract class NetworkNode {
     
     public override string ToString() {
         string validCache = "";
-        if (MaximumJumpsToDataCache == null || MaximumJumpsToDataCache <= _stepsToDataCache) {
+        if (MaximumJumpsToDataCache == null || MaximumJumpsToDataCache >= _stepsToDataCache) {
             validCache = "True".ToColor(ConsoleColor.Green);
         }
         else {
