@@ -1,4 +1,4 @@
-<prefix> <action> [arg1] [arg2] [id]<br>
+\<prefix> \<action> [arg1] [arg2] [id]<br>
 <br>
 commands:<br>
 <br>
