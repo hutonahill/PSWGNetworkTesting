@@ -23,6 +23,9 @@ public static class Program {
         root.AddChild(door);
         
         PrintTree(root);
+
+        Commands command = new Commands();
+        command.AskForCommand();
     }
     
     public static void PrintTree(NetworkNode root){
