@@ -30,7 +30,7 @@ public sealed class PowerNode : NetworkNode {
     
     public override uint? MaximumJumpsToDataCache { get; protected init; } = 2;
     
-    public uint Producing { get; init; }
+    public required uint Producing { get; init; }
     
     public bool On { get; private set; } = false;
     
@@ -38,7 +38,7 @@ public sealed class PowerNode : NetworkNode {
         if (!On) {
             On = true;
             
-            FindRoot().AddPower(Producing);
+            FindRoot()?.AddPowerSupply(Producing);
         }
     }
     
@@ -46,7 +46,7 @@ public sealed class PowerNode : NetworkNode {
         if (On) {
             On = false;
             
-            FindRoot().RemovePower(Producing);
+            FindRoot()?.RemovePowerSupply(Producing);
         }
     }
 }

@@ -29,6 +29,55 @@ public class AdminTerminal : NetworkNode {
         AddedParent += _ => isRoot = false;
     }
     
+    public void RetallyPower() {
+        if (!isRoot) {
+            throw new InvalidOperationException($"Must be root to call {nameof(RetallyPower)}");
+        }
+        
+        NetworkPowerAvailable = 0;
+        NetworkPowerSupply = 0;
+        
+        List<NetworkNode> network = GetNetwork();
+        
+        foreach (PowerNode node in network.OfType<PowerNode>()) {
+            
+            if (node.On) {
+                NetworkPowerSupply += node.Producing;
+            }
+        }
+        
+        NetworkPowerAvailable = NetworkPowerSupply;
+        
+        foreach (NetworkNode node in GetUnpoweredNodesByDepthAscending().Select(n => n.Node)) {
+            if (NetworkPowerAvailable >= node.PowerCost) {
+                NetworkPowerAvailable -= node.PowerCost;
+                node.Power();
+            }
+        }
+    }
+    
+    private List<NetworkNode> GetNetwork() {
+        if (!isRoot) {
+            throw new InvalidOperationException($"Must be root to call {nameof(GetNetwork)}");
+        }
+        
+        Queue<NetworkNode> queue = new ();
+        List<NetworkNode> output = new ();
+        
+        queue.Enqueue(this);
+        
+        while (queue.Any()) {
+            NetworkNode current = queue.Dequeue();
+            output.Add(current);
+            
+            foreach (NetworkNode child in current.ChildNodes) {
+                queue.Enqueue(child);
+            }
+        }
+        
+        return output;
+    }
+    
     public override bool IsKeyNode { get; } = true;
     
     public override uint PowerCost { get; protected init; } = 3;
@@ -49,9 +98,9 @@ public class AdminTerminal : NetworkNode {
     /// </summary>
     public uint NetworkPowerAvailable { get; private set; }
     
-    public void AddPower(uint amount) {
+    public void AddPowerSupply(uint amount) {
         if (!isRoot) {
-            throw new InvalidOperationException($"You may only call {nameof(AddPower)} on the root node.");
+            throw new InvalidOperationException($"You may only call {nameof(AddPowerSupply)} on the root node.");
         }
         
         NetworkPowerSupply += amount;
@@ -93,9 +142,9 @@ public class AdminTerminal : NetworkNode {
         }
     }
     
-    public void RemovePower(uint amount) {
+    public void RemovePowerSupply(uint amount) {
         if (!isRoot) {
-            throw new InvalidOperationException($"You may only call {nameof(RemovePower)} on the root node.");
+            throw new InvalidOperationException($"You may only call {nameof(RemovePowerSupply)} on the root node.");
         }
         
         if (NetworkPowerSupply < amount) {
@@ -114,11 +163,9 @@ public class AdminTerminal : NetworkNode {
         
         List<(NetworkNode Node, int Depth)> poweredNodes = GetPoweredNodesByDepthDescending();
         
-        for (int i = 0; i < poweredNodes.Count && deficit > 0; i++){
-            NetworkNode node = poweredNodes[i].Node;
-            
+        foreach (NetworkNode node in poweredNodes.Select(n => n.Node)){
             // don't do anything if the node isn't powered.
-            if (node.Powered){
+            if (node.Powered && node.PowerCost > 0){
                 uint reclaimed = node.PowerCost;
                 
                 node.CutPower();
@@ -166,6 +213,32 @@ public class AdminTerminal : NetworkNode {
            .ToList();
     }
     
+    private List<(NetworkNode Node, int Depth)> GetUnpoweredNodesByDepthAscending(){
+        List<(NetworkNode Node, int Depth)> output = new ();
+        Queue<(NetworkNode Node, int Depth)> queue = new ();
+        
+        queue.Enqueue((this, 0));
+        
+        while (queue.Count > 0){
+            (NetworkNode Node, int Depth) current = queue.Dequeue();
+            
+            if (!current.Node.Powered){
+                output.Add(current);
+            }
+            
+            IReadOnlyList<NetworkNode> children = current.Node.ChildNodes;
+            foreach (NetworkNode child in children){
+                queue.Enqueue((child, current.Depth + 1));
+            }
+        }
+        
+        return output
+           .OrderBy(x => x.Depth)                   // closest to root first
+           .ThenByDescending(x => x.Node.IsKeyNode) // key nodes first
+           .ToList();
+    }
+
+    
     private List<PowerNode> _powerNodes = new ();
     
     private List<DataCache> _dataNodes = new ();
@@ -184,11 +257,23 @@ public class AdminTerminal : NetworkNode {
         base.AddChild(node);
     }
     
-    public void RecalculatePower() {
+    public override string ToString() {
+        string validCache = "";
+        if (MaximumJumpsToDataCache <= _stepsToDataCache) {
+            validCache = "True".ToColor(ConsoleColor.Green);
+        }
+        else {
+            validCache = $"{MaximumJumpsToDataCache - _stepsToDataCache}".ToColor(ConsoleColor.Red);
+        }
         
-    }
-    
-    public void PullPower(NetworkNode node) {
+        string power = "False".ToColor(ConsoleColor.Red);
+        if (Powered) {
+            power = "True".ToColor(ConsoleColor.Green);
+        }
         
+        if (!isRoot) {
+            return $"{nameof(AdminTerminal)} {{DataCache Valid: {validCache}, Powered: {power}}}";
+        }
+        return $"{nameof(AdminTerminal)} {{DataCache Valid: {validCache}, Powered: {power}, Network Power Capacity: {NetworkPowerSupply}, Network Power Available: {NetworkPowerAvailable}}}";
     }
 }

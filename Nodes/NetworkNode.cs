@@ -105,9 +105,16 @@ public abstract class NetworkNode {
         
         _childNodes.Add(node);
         
-        AdminTerminal root = FindRoot();
+        AdminTerminal? root = FindRoot();
         
-        root.FindDataCaches();
+        if (root != null) {
+            root.FindDataCaches();
+            if (node.ChildNodes.Any()) {
+                root.RetallyPower();
+            }
+        }
+        
+        
         
         if (node is PowerNode powerNode) {
             powerNode.TurnPowerOn();
@@ -173,7 +180,7 @@ public abstract class NetworkNode {
     /// </summary>
     public abstract uint? MaximumJumpsToDataCache { get; protected init; }
     
-    private uint _stepsToDataCache = uint.MaxValue;
+    protected uint _stepsToDataCache { get; private set; } = uint.MaxValue;
     
     /// <summary>
     /// Sets the _stepsToDataCache values for all child nodes to maximum value.
@@ -226,7 +233,7 @@ public abstract class NetworkNode {
         }
     }
     
-    protected AdminTerminal FindRoot() {
+    protected AdminTerminal? FindRoot() {
         NetworkNode current = this;
         
         while (current.ParentNode != null) {
@@ -234,13 +241,26 @@ public abstract class NetworkNode {
         }
         
         if (current is not AdminTerminal adminTerminal) {
-            throw new InvalidOperationException("Network must have an AdminTerminal as root.");
+            return null;
         }
         
         return adminTerminal;
     }
     
     public override string ToString() {
-        return $"{GetType().Name} {{ DataCache Distance: {_stepsToDataCache}, Powered: {Powered}}}";
+        string validCache = "";
+        if (MaximumJumpsToDataCache == null || MaximumJumpsToDataCache <= _stepsToDataCache) {
+            validCache = "True".ToColor(ConsoleColor.Green);
+        }
+        else {
+            validCache = $"{MaximumJumpsToDataCache - _stepsToDataCache}".ToColor(ConsoleColor.Red);
+        }
+        
+        string power = "False".ToColor(ConsoleColor.Red);
+        if (Powered) {
+            power = "True".ToColor(ConsoleColor.Green);
+        }
+        
+        return $"{GetType().Name} {{DataCache Valid: {validCache}, Powered: {power}}}";
     }
 }
